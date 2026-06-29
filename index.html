@@ -81,7 +81,13 @@
    <div class=sub2>
     <input id=yf type=number placeholder="Year from" style="width:120px">
     <input id=yt type=number placeholder="Year to" style="width:120px">
-    <button class=ghost onclick="go()">Apply years</button>
+    <label class=hint>Sort:
+     <select id=sort onchange="if(lastArgs)go()">
+      <option value=rel>Relevance</option>
+      <option value=new>Newest first</option>
+      <option value=old>Oldest first</option>
+     </select></label>
+    <button class=ghost onclick="go()">Apply</button>
     <button class=ghost onclick="clearAll()">Clear</button>
     <button class=ghost id=fbtn onclick="toggleFilters()" style="display:none">⚙ Filter courts</button>
     <span class=hint id=courtinfo></span>
@@ -145,6 +151,13 @@ function parseTitle(t){
   if(sp.length>=2) return {pet:sp[0].trim(), res:sp.slice(1).join(' v. ').trim(), ref};
   return {pet:t, res:'', ref};
 }
+function fmtDate(d){
+ d=String(d||'').trim(); if(!d) return '';
+ let m=d.match(/^(\d{4})-(\d{2})-(\d{2})/); if(m) return `${m[1]}-${m[2]}-${m[3]}`;
+ m=d.match(/^(\d{2})-(\d{2})-(\d{4})/);     if(m) return `${m[3]}-${m[2]}-${m[1]}`;
+ m=d.match(/^(\d{4})\/(\d{2})\/(\d{2})/);   if(m) return `${m[1]}-${m[2]}-${m[3]}`;
+ return d;
+}
 function titleHTML(t){
   const p=parseTitle(t);
   if(p.res) return esc(p.pet)+'<span class=vs>v.</span>'+esc(p.res);
@@ -206,21 +219,28 @@ const SEL={
  hc:"j.id,j.title,j.cnr,j.disposal,j.judge,j.court,j.decision_date,j.year,j.pdf_url"
 };
 
-function buildQuery(W,q,yf,yt,limit,offset){
+function sortMode(){ return ($('#sort')&&$('#sort').value)||'rel'; }
+function orderClause(s,hasQuery){
+ if(s==='new') return 'ORDER BY j.year DESC, j.id DESC';
+ if(s==='old') return 'ORDER BY j.year ASC, j.id ASC';
+ return hasQuery ? 'ORDER BY rank' : 'ORDER BY j.year DESC, j.id DESC';   // relevance
+}
+function buildQuery(W,q,yf,yt,limit,offset,s){
  const sel=SEL[W.kind]||SEL.hc;
  const yc=[];
  if(yf) yc.push('j.year>='+(parseInt(yf,10)||0));
  if(yt) yc.push('j.year<='+(parseInt(yt,10)||9999));
+ const ord=orderClause(s,!!q);
  if(q){
    const extra=yc.length?(' AND '+yc.join(' AND ')):'';
-   return m=>`SELECT ${sel} FROM jfts JOIN j ON j.id=jfts.rowid WHERE jfts MATCH ${m} ${extra} ORDER BY rank LIMIT ${limit} OFFSET ${offset}`;
+   return m=>`SELECT ${sel} FROM jfts JOIN j ON j.id=jfts.rowid WHERE jfts MATCH ${m} ${extra} ${ord} LIMIT ${limit} OFFSET ${offset}`;
  }
  const where=yc.length?(' WHERE '+yc.join(' AND ')):'';
- return ()=>`SELECT ${sel} FROM j ${where} ORDER BY j.year DESC, j.id DESC LIMIT ${limit} OFFSET ${offset}`;
+ return ()=>`SELECT ${sel} FROM j ${where} ${ord} LIMIT ${limit} OFFSET ${offset}`;
 }
 
 async function runQuery(W,q,yf,yt,offset,limit){
- const b=buildQuery(W,q,yf,yt,limit||PAGE,offset);
+ const b=buildQuery(W,q,yf,yt,limit||PAGE,offset,sortMode());
  let rows;
  try{ rows=await W.db.query(b(q?sqstr(q):'')); }
  catch(_){ rows=await W.db.query(b(sqstr('"'+(q||'').replace(/"/g,'')+'"'))); }
@@ -269,8 +289,10 @@ async function goAll(q,yf,yt){
    return rows;
  });
  let rows=[].concat(...chunks);
- // newest first across courts (common, comparable key)
- rows.sort((a,b)=>String(b.decision_date||b.year||'').localeCompare(String(a.decision_date||a.year||'')));
+ // sort across courts by numeric year (date strings vary by court: DD-MM-YYYY vs YYYY-MM-DD)
+ const yr=r=>parseInt(r.year,10)||0, dt=r=>String(r.decision_date||'');
+ const asc=sortMode()==='old';
+ rows.sort((a,b)=> asc ? (yr(a)-yr(b))||dt(a).localeCompare(dt(b)) : (yr(b)-yr(a))||dt(b).localeCompare(dt(a)));
  lastRows=rows; lastArgs={mode:'all',q,yf,yt};
  const fl=(yf||yt)?` · ${yf||'…'}–${yt||'…'}`:'';
  const scope = keys.length===COURTS.length ? `all ${keys.length} courts` : `${keys.length} selected court(s)`;
@@ -293,7 +315,7 @@ async function loadMore(){
 }
 
 function cardHTML(r,i,showCourt){
- const date=r.decision_date||r.year||'';
+ const date=fmtDate(r.decision_date)||r.year||'';
  const cite=r.citation||r.neutral||r.cnr||'';
  const courtName = showCourt ? (r._court||r.court) : r.court;
  return `<div class=card data-i="${i}">
@@ -320,7 +342,7 @@ function openD(r){
   ['Court', r._court||r.court||W.name],
   ['Petitioner', p.pet],
   ['Respondent', p.res],
-  ['Decision date', r.decision_date||r.year],
+  ['Decision date', fmtDate(r.decision_date)||r.year],
   ['Bench / Judge', r.judge],
   ['Case number', p.ref],
   ['CNR', r.cnr],
@@ -354,13 +376,13 @@ async function loadRelated(W,party,self){
  rows=rows.filter(x=>x.id!==self.id).slice(0,6);
  $('#rel').innerHTML = rows.length? rows.map(r=>`<div class=card data-rel='${esc(JSON.stringify(r))}'>
      <h3>${titleHTML(r.title)}</h3>
-     <div class=tags>${(r.decision_date||r.year)?`<span class="tag y">${esc(r.decision_date||r.year)}</span>`:''}${r.pdf_url?'<span class=tag>📄 PDF</span>':''}</div>
+     <div class=tags>${(r.decision_date||r.year)?`<span class="tag y">${esc(fmtDate(r.decision_date)||r.year)}</span>`:''}${r.pdf_url?'<span class=tag>📄 PDF</span>':''}</div>
    </div>`).join('') : '<span class=hint>No related cases found.</span>';
  $('#rel').querySelectorAll('.card[data-rel]').forEach(el=>{ el.onclick=()=>openD(JSON.parse(el.dataset.rel)); });
 }
 function closeD(){ $('#scrim').classList.remove('on'); $('#drawer').classList.remove('on'); $('#drawer').setAttribute('aria-hidden','true'); }
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeD(); });
-function clearAll(){ $('#q').value=''; $('#yf').value=''; $('#yt').value=''; $('#results').innerHTML=''; $('#meta').textContent=''; $('#more').style.display='none'; $('#q').focus(); }
+function clearAll(){ $('#q').value=''; $('#yf').value=''; $('#yt').value=''; if($('#sort'))$('#sort').value='rel'; $('#results').innerHTML=''; $('#meta').textContent=''; $('#more').style.display='none'; $('#q').focus(); }
 
 loadCourts().catch(e=>{ $('#boot').textContent='Failed to load court list: '+e.message; });
 </script>
