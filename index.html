@@ -246,7 +246,6 @@ function openD(r){
  const W=lastArgs.W;
  const p=parseTitle(r.title);
  $('#dtitle').innerHTML=titleHTML(r.title);
- const ik="https://indiankanoon.org/search/?formInput="+encodeURIComponent((p.pet||'')+' '+(p.res||'')+' '+(r.neutral||r.citation||r.cnr||''));
  const rows=[
   ['Court', r.court||W.name],
   ['Petitioner', p.pet],
@@ -263,7 +262,6 @@ function openD(r){
  let html=`<div class=grid>`+rows.map(x=>`<div class=k>${x[0]}</div><div class=v>${esc(x[1])}</div>`).join('')+`</div>
   <div class=actions>
    ${r.pdf_url?`<a class=btn href="${r.pdf_url}" target=_blank rel=noopener>📄 Open official PDF</a>`:''}
-   <a class="btn alt" href="${ik}" target=_blank rel=noopener>🔎 Read on Indian Kanoon</a>
    ${cite?`<button class="btn alt" onclick="navigator.clipboard.writeText(${JSON.stringify(cite)});this.textContent='✓ Copied'">⧉ Copy citation</button>`:''}
   </div>`;
  if(r.pdf_url){
@@ -271,7 +269,7 @@ function openD(r){
      <div class=pdfwrap><iframe src="${r.pdf_url}#view=FitH" title="judgment pdf" loading=lazy></iframe></div>
      <div class=hint style="margin-top:6px">If the document doesn't display above, use “Open official PDF”. Large scanned judgments may take a moment to load.</div>`;
  } else {
-   html+=`<div class=hint>No PDF is available in the open dataset for this record — use “Read on Indian Kanoon” for the text.</div>`;
+   html+=`<div class=hint>No PDF is available in the open dataset for this record.</div>`;
  }
  html+=`<div class=sechead>Related cases (same party, this court)</div><div class=rel id=rel><span class=hint>searching…</span></div>`;
  $('#dbody').innerHTML=html;
