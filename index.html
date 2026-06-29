@@ -137,7 +137,11 @@ function titleHTML(t){
 }
 
 async function loadCourts(){
- const r=await fetch(new URL("courts.json",location.href).toString(),{cache:"no-cache"});
+ // On localhost, prefer courts.local.json (serves every court's DB from disk) if present.
+ const isLocal=/^(localhost|127\.|0\.0\.0\.0)/.test(location.hostname);
+ let manifest="courts.json";
+ if(isLocal){ try{ const h=await fetch(new URL("courts.local.json",location.href),{method:"HEAD"}); if(h.ok) manifest="courts.local.json"; }catch(_){} }
+ const r=await fetch(new URL(manifest,location.href).toString(),{cache:"no-cache"});
  COURTS=await r.json();
  const sel=$('#court'); sel.innerHTML=''; let tot=0;
  for(const c of COURTS){ tot+=c.rows||0;
@@ -153,11 +157,13 @@ async function ensure(key){
  if(workers[key]) return workers[key];
  const c=COURTS.find(x=>x.key===key); if(!c) throw new Error('unknown court');
  $('#courtinfo').innerHTML='<span class=spin></span>loading '+esc(c.name)+' index…';
- const cfg=[{from:"inline",config:{
-   serverMode:"chunked", requestChunkSize:4096,
-   urlPrefix:new URL(c.urlPrefix,location.href).toString(),
-   serverChunkSize:c.serverChunkSize||10485760,
-   databaseLengthBytes:c.lengthBytes, suffixLength:c.suffixLength||3 }}];
+ const cfg=[ c.mode==='full'
+   ? {from:"inline",config:{serverMode:"full", requestChunkSize:4096,
+        url:new URL(c.url,location.href).toString()}}
+   : {from:"inline",config:{serverMode:"chunked", requestChunkSize:4096,
+        urlPrefix:new URL(c.urlPrefix,location.href).toString(),
+        serverChunkSize:c.serverChunkSize||10485760,
+        databaseLengthBytes:c.lengthBytes, suffixLength:c.suffixLength||3}} ];
  const wkr=new URL("sqlite/sqlite.worker.js",location.href).toString();
  const wasm=new URL("sqlite/sql-wasm.wasm",location.href).toString();
  const w=await window.createDbWorker(cfg,wkr,wasm);

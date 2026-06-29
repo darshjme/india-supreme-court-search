@@ -5,3 +5,5 @@ data/index.db
 data/hc/
 data/courts.json
 data/hc_local/
+
+courts.local.json
