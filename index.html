@@ -5,90 +5,154 @@
 <meta name=viewport content="width=device-width,initial-scale=1">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>⚖️</text></svg>">
 <title>Indian Courts — Judgment Search (Supreme Court + all 25 High Courts)</title>
-<meta name=description content="Free search across 19 million+ case records from the Supreme Court of India and all 25 High Courts. Open data, official PDFs.">
+<meta name=description content="Free search across 17 million+ case records from the Supreme Court of India and all 25 High Courts. Open data, official judgment PDFs.">
 <style>
- :root{--b:#0b3d2e;--ac:#0a7d46;--bg:#f5f7f6}
- *{box-sizing:border-box} body{font:15px/1.5 system-ui,Segoe UI,Arial;margin:0;background:var(--bg);color:#1b2330}
- header{background:var(--b);color:#fff;padding:16px 20px}
- header h1{margin:0;font-size:19px} header small{opacity:.85;font-weight:400}
- .wrap{max-width:980px;margin:0 auto;padding:18px}
- .bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
- #q{flex:1;min-width:240px;padding:12px 14px;font-size:16px;border:1px solid #c3ccd8;border-radius:8px}
- select,button,input[type=number]{padding:12px 14px;font-size:15px;border:1px solid #c3ccd8;border-radius:8px;background:#fff}
- #court{min-width:240px;font-weight:600}
- button{background:var(--ac);color:#fff;border:0;cursor:pointer;font-weight:600}
- .meta{color:#5a6675;font-size:13px;margin:6px 2px 14px}
- .card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px;margin:10px 0}
- .card h3{margin:0 0 4px;font-size:16px;color:var(--b)}
- .cite{font-weight:600;color:var(--ac)} .neu{color:#5a6675} .sub{color:#5a6675;font-size:13px;margin-top:3px}
- .row{margin-top:9px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
- a.pdf{background:var(--ac);color:#fff;padding:7px 12px;border-radius:7px;text-decoration:none;font-weight:600;font-size:13px}
- a.ik{color:var(--b);font-size:13px}
- .hint{color:#8a94a3;font-size:12px} #boot{padding:16px;color:#5a6675}
- .badge{display:inline-block;background:#e6f2ec;color:var(--b);border-radius:6px;padding:2px 8px;font-size:12px;margin-left:6px}
- footer{max-width:980px;margin:20px auto;padding:14px 18px;color:#6b7280;font-size:12px;border-top:1px solid #e2e8f0}
+ :root{--b:#0b3d2e;--ac:#0a7d46;--ac2:#0c9457;--bg:#eef2f0;--card:#fff;--line:#dfe6e1;--mut:#5a6675}
+ *{box-sizing:border-box} html,body{margin:0;height:100%}
+ body{font:15px/1.55 system-ui,Segoe UI,Arial;background:var(--bg);color:#16201b}
+ header{background:linear-gradient(135deg,#0b3d2e,#0c5a3c);color:#fff;padding:14px 20px;position:sticky;top:0;z-index:20;box-shadow:0 2px 10px rgba(0,0,0,.12)}
+ header h1{margin:0;font-size:18px;letter-spacing:.2px} header small{opacity:.85;font-weight:400}
+ .wrap{max-width:1080px;margin:0 auto;padding:16px 18px}
+ .panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+ .bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+ #q{flex:1;min-width:240px;padding:12px 14px;font-size:16px;border:1px solid #c3ccd8;border-radius:9px}
+ select,button,input[type=number]{padding:11px 13px;font-size:15px;border:1px solid #c3ccd8;border-radius:9px;background:#fff;color:#16201b}
+ #court{min-width:260px;font-weight:600}
+ button.primary{background:var(--ac);color:#fff;border:0;cursor:pointer;font-weight:700;padding:12px 20px}
+ button.primary:hover{background:var(--ac2)}
+ button.ghost{background:#eef2f0;border:1px solid #c3ccd8;cursor:pointer}
+ .sub2{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:9px}
+ .hint{color:#8a94a3;font-size:12px} .mut{color:var(--mut)}
+ .meta{color:var(--mut);font-size:13px;margin:4px 2px 10px;min-height:18px}
+ .card{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:13px 15px;margin:10px 0;cursor:pointer;transition:.12s}
+ .card:hover{border-color:var(--ac);box-shadow:0 3px 14px rgba(10,125,70,.10);transform:translateY(-1px)}
+ .card h3{margin:0 0 5px;font-size:15.5px;color:var(--b);line-height:1.35}
+ .vs{color:#9aa6ad;font-weight:600;font-style:italic;margin:0 5px}
+ .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+ .tag{font-size:11.5px;background:#eaf3ee;color:#0b5a3c;border:1px solid #cfe6d8;border-radius:20px;padding:2px 9px;font-weight:600}
+ .tag.y{background:#fff6e0;color:#8a6a13;border-color:#f0e2b8}
+ .tag.d{background:#eef1ff;color:#3a44a0;border-color:#d6dbf5}
+ .caseref{color:var(--mut);font-size:12.5px;margin-top:3px;font-family:ui-monospace,Consolas,monospace}
+ #more{display:none;margin:6px auto 0;}
+ /* detail drawer */
+ .scrim{position:fixed;inset:0;background:rgba(10,20,15,.45);opacity:0;pointer-events:none;transition:.18s;z-index:40}
+ .scrim.on{opacity:1;pointer-events:auto}
+ .drawer{position:fixed;top:0;right:0;height:100%;width:min(820px,100%);background:#f7faf8;box-shadow:-6px 0 28px rgba(0,0,0,.22);transform:translateX(100%);transition:.22s;z-index:41;display:flex;flex-direction:column}
+ .drawer.on{transform:none}
+ .dhead{background:var(--b);color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+ .dhead h2{margin:0;font-size:16px;line-height:1.4}
+ .x{background:rgba(255,255,255,.16);border:0;color:#fff;font-size:20px;border-radius:8px;cursor:pointer;padding:2px 12px;line-height:1.4}
+ .dbody{overflow:auto;padding:16px 18px}
+ .grid{display:grid;grid-template-columns:140px 1fr;gap:7px 14px;font-size:14px;margin-bottom:12px}
+ .grid .k{color:var(--mut);font-weight:600} .grid .v{word-break:break-word}
+ .actions{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 14px}
+ a.btn,button.btn{display:inline-flex;align-items:center;gap:6px;background:var(--ac);color:#fff;text-decoration:none;padding:9px 14px;border-radius:9px;font-weight:700;font-size:13.5px;border:0;cursor:pointer}
+ a.btn.alt,button.btn.alt{background:#eef2f0;color:var(--b);border:1px solid #c3ccd8}
+ .pdfwrap{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff;height:560px}
+ .pdfwrap iframe{width:100%;height:100%;border:0}
+ .sechead{font-weight:700;color:var(--b);margin:16px 0 6px;font-size:14px}
+ .rel .card{margin:7px 0;padding:9px 12px}
+ .rel .card h3{font-size:13.5px}
+ #boot{padding:40px 16px;text-align:center;color:var(--mut)}
+ .spin{display:inline-block;width:15px;height:15px;border:2px solid #cfe0d6;border-top-color:var(--ac);border-radius:50%;animation:s .7s linear infinite;vertical-align:-2px;margin-right:7px}
+ @keyframes s{to{transform:rotate(360deg)}}
+ footer{max-width:1080px;margin:18px auto;padding:14px 18px;color:#6b7280;font-size:12px;border-top:1px solid var(--line)}
  footer a{color:var(--ac)}
+ @media(max-width:560px){.grid{grid-template-columns:1fr}.grid .k{margin-top:6px}#court{min-width:100%}}
 </style>
 </head>
 <body>
 <header><div class=wrap style="padding:0">
- <h1>Indian Courts — Judgment Search</h1>
- <small>Supreme Court + all 25 High Courts · <span id=totrows>19M+</span> case records · open data, official PDFs</small>
+ <h1>⚖️ Indian Courts — Judgment Search</h1>
+ <small>Supreme Court + all 25 High Courts · <span id=totrows>17M+</span> case records · open data · official judgment PDFs</small>
 </div></header>
+
 <div class=wrap>
- <div id=boot>Loading court list…</div>
+ <div id=boot><span class=spin></span>Loading court list…</div>
+
  <div id=app style="display:none">
-  <div class=bar>
-   <select id=court title="Choose a court"></select>
-   <span class=hint id=courtinfo></span>
+  <div class=panel>
+   <div class=bar>
+    <select id=court title="Choose a court"></select>
+    <input id=q placeholder='party name · judge · case no / CNR · "exact phrase" · arbitrat*' autofocus>
+    <button class=primary onclick="go()">Search</button>
+   </div>
+   <div class=sub2>
+    <input id=yf type=number placeholder="Year from" style="width:120px">
+    <input id=yt type=number placeholder="Year to" style="width:120px">
+    <button class=ghost onclick="go()">Apply years</button>
+    <button class=ghost onclick="clearAll()">Clear</button>
+    <span class=hint id=courtinfo></span>
+   </div>
+   <div class=hint style="margin-top:8px">Tip: pick a court, type a party/judge/case-number, then click a result to read the full judgment. FTS5: <b>"exact phrase"</b>, AND/OR/NOT, prefix <b>arbitrat*</b>.</div>
   </div>
-  <form class=bar onsubmit="go(event)">
-   <input id=q placeholder='party name · judge · case no / CNR · "exact phrase" · prefix arbitrat*' autofocus>
-   <button>Search</button>
-  </form>
-  <div class=bar>
-   <input id=yf type=number placeholder="Year from" style="width:130px">
-   <input id=yt type=number placeholder="Year to" style="width:130px">
-   <button type=button onclick="go()">Apply</button>
-   <button type=button style="background:#6b7280" onclick="clearF()">Clear</button>
-  </div>
-  <div class=hint>Pick a court, then search. Each court's index loads on demand (served as byte-range requests from static hosting). Click <b>Official PDF</b> for the full judgment where available.</div>
+
   <div class=meta id=meta></div>
   <div id=results></div>
+  <button class="primary" id=more onclick="loadMore()">Load more results</button>
  </div>
 </div>
+
+<!-- detail drawer -->
+<div class=scrim id=scrim onclick="closeD()"></div>
+<div class=drawer id=drawer aria-hidden=true>
+ <div class=dhead>
+  <h2 id=dtitle></h2>
+  <button class=x onclick="closeD()" title="Close">×</button>
+ </div>
+ <div class=dbody id=dbody></div>
+</div>
+
 <footer>
  Data: <a href="https://registry.opendata.aws/indian-supreme-court-judgments/" target=_blank rel=noopener>Indian Supreme Court Judgments</a>
  &amp; <a href="https://registry.opendata.aws/indian-high-court-judgments/" target=_blank rel=noopener>Indian High Court Judgments</a>
- open datasets (sourced from the Supreme Court of India / High Courts / eCourts), licensed <b>CC-BY-4.0</b>.
- Judgment PDFs are served from the official open-data buckets. Free research tool; verify against the official record before citing.
+ open datasets (Supreme Court / High Courts / eCourts), licensed <b>CC-BY-4.0</b>.
+ Judgment PDFs are served from the official open-data buckets. Free research tool — verify against the official record before citing.
 </footer>
+
 <script src="sqlite/index.js"></script>
 <script>
 const $=s=>document.querySelector(s);
-let COURTS=[], cur=null;
-const workers={};   // key -> {db} cached per court
+let COURTS=[], workers={}, lastRows=[], page=0, lastArgs=null;
 const sqstr=s=>"'"+String(s).replace(/'/g,"''")+"'";
-function esc(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
-function clearF(){$('#yf').value='';$('#yt').value='';go();}
+const esc=s=>(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const PAGE=40;
+
+// ---- party parsing from title ----
+function parseTitle(t){
+  t=(t||'').trim();
+  let ref='';
+  // strip leading "CASETYPE/NO/YEAR of " (HC style)
+  const m=t.match(/^(.{1,40}?\/\S+?\/\d{2,4})\s+of\s+(.*)$/i);
+  if(m){ ref=m[1]; t=m[2]; }
+  // split parties on versus / vs / v.
+  const sp=t.split(/\s+(?:versus|vs\.?|v\.)\s+/i);
+  if(sp.length>=2) return {pet:sp[0].trim(), res:sp.slice(1).join(' v. ').trim(), ref};
+  return {pet:t, res:'', ref};
+}
+function titleHTML(t){
+  const p=parseTitle(t);
+  if(p.res) return esc(p.pet)+'<span class=vs>v.</span>'+esc(p.res);
+  return esc(p.pet||'(untitled)');
+}
 
 async function loadCourts(){
  const r=await fetch(new URL("courts.json",location.href).toString(),{cache:"no-cache"});
  COURTS=await r.json();
- const sel=$('#court'); sel.innerHTML='';
- let tot=0;
+ const sel=$('#court'); sel.innerHTML=''; let tot=0;
  for(const c of COURTS){ tot+=c.rows||0;
    const o=document.createElement('option'); o.value=c.key;
    o.textContent=`${c.name}  (${(c.rows||0).toLocaleString()})`; sel.appendChild(o); }
  $('#totrows').textContent=tot.toLocaleString();
- sel.onchange=()=>{$('#results').innerHTML='';$('#meta').textContent='';$('#courtinfo').textContent='';};
- $('#boot').style.display='none'; $('#app').style.display='block';
+ sel.onchange=()=>{ $('#results').innerHTML=''; $('#meta').textContent=''; $('#more').style.display='none'; $('#courtinfo').textContent=''; };
+ $('#q').addEventListener('keydown',e=>{ if(e.key==='Enter') go(); });
+ $('#boot').style.display='none'; $('#app').style.display='block'; $('#q').focus();
 }
 
 async function ensure(key){
  if(workers[key]) return workers[key];
  const c=COURTS.find(x=>x.key===key); if(!c) throw new Error('unknown court');
- $('#courtinfo').textContent='loading '+c.name+' index…';
+ $('#courtinfo').innerHTML='<span class=spin></span>loading '+esc(c.name)+' index…';
  const cfg=[{from:"inline",config:{
    serverMode:"chunked", requestChunkSize:4096,
    urlPrefix:new URL(c.urlPrefix,location.href).toString(),
@@ -107,47 +171,124 @@ const SEL={
  hc:"j.id,j.title,j.cnr,j.disposal,j.judge,j.court,j.decision_date,j.year,j.pdf_url"
 };
 
-async function go(e){ e&&e.preventDefault();
- const key=$('#court').value;
- const q=$('#q').value.trim(), yf=$('#yf').value, yt=$('#yt').value;
- if(!q && !yf && !yt){$('#meta').textContent='Enter a query or year range.';return;}
- $('#meta').textContent='Loading index & searching…'; $('#results').innerHTML='';
- let W; try{ W=await ensure(key); }catch(err){ $('#meta').textContent='Failed to load index: '+err.message; return; }
+function buildQuery(W,q,yf,yt,limit,offset){
  const sel=SEL[W.kind]||SEL.hc;
  const yc=[];
  if(yf) yc.push('j.year>='+(parseInt(yf,10)||0));
  if(yt) yc.push('j.year<='+(parseInt(yt,10)||9999));
- let rows;
- try{
-  if(q){
+ if(q){
    const extra=yc.length?(' AND '+yc.join(' AND ')):'';
-   const base=m=>`SELECT ${sel} FROM jfts JOIN j ON j.id=jfts.rowid WHERE jfts MATCH ${m} ${extra} ORDER BY rank LIMIT 50`;
-   try{ rows=await W.db.query(base(sqstr(q))); }
-   catch(_){ rows=await W.db.query(base(sqstr('"'+q.replace(/"/g,'')+'"'))); }
-  }else{
-   const where=yc.length?(' WHERE '+yc.join(' AND ')):'';
-   rows=await W.db.query(`SELECT ${sel} FROM j ${where} ORDER BY j.year DESC, j.id DESC LIMIT 50`);
-  }
- }catch(err){ $('#meta').textContent='Query error: '+err.message; return; }
- const fl=(yf||yt)?` [${yf||'…'}–${yt||'…'}]`:'';
- $('#meta').textContent=`${rows.length} result(s)`+(q?` for "${q}"`:'')+` in ${W.name}`+fl;
- $('#results').innerHTML=rows.map(r=>{
-   const idline=r.citation?`<span class=cite>${esc(r.citation)}</span>${r.neutral?' <span class=neu>· '+esc(r.neutral)+'</span>':''}`
-                          :(r.cnr?`<span class=neu>CNR ${esc(r.cnr)}</span>`:'');
-   const date=r.decision_date?esc(r.decision_date):(r.year||'');
-   const ikq=encodeURIComponent((r.title||'')+' '+(r.neutral||r.citation||r.cnr||''));
-   return `<div class=card>
-     <h3>${esc(r.title||'(untitled)')}</h3>
-     <div class=sub>${idline}${idline&&date?' · ':''}${date}${r.disposal?' · '+esc(r.disposal):''}</div>
-     ${r.court&&W.kind!=='sc'?`<div class=sub>${esc(r.court)}</div>`:''}
-     ${r.judge?`<div class=sub>Bench: ${esc(r.judge)}</div>`:''}
-     <div class=row>
-       ${r.pdf_url?`<a class=pdf href="${r.pdf_url}" target=_blank rel=noopener>Official PDF ↗</a>`:'<span class=hint>(no PDF in open data — use Indian Kanoon)</span>'}
-       <a class=ik href="https://indiankanoon.org/search/?formInput=${ikq}" target=_blank rel=noopener>Indian Kanoon ↗</a>
-     </div></div>`;
- }).join('')||'<p>No results. Try a party name, or broaden the query.</p>';
+   return m=>`SELECT ${sel} FROM jfts JOIN j ON j.id=jfts.rowid WHERE jfts MATCH ${m} ${extra} ORDER BY rank LIMIT ${limit} OFFSET ${offset}`;
+ }
+ const where=yc.length?(' WHERE '+yc.join(' AND ')):'';
+ return ()=>`SELECT ${sel} FROM j ${where} ORDER BY j.year DESC, j.id DESC LIMIT ${limit} OFFSET ${offset}`;
 }
-loadCourts().catch(e=>{$('#boot').textContent='Failed to load court list: '+e.message;});
+
+async function runQuery(W,q,yf,yt,offset){
+ const b=buildQuery(W,q,yf,yt,PAGE,offset);
+ try{ return await W.db.query(b(q?sqstr(q):'')); }
+ catch(_){ return await W.db.query(b(sqstr('"'+(q||'').replace(/"/g,'')+'"'))); }
+}
+
+async function go(){
+ const key=$('#court').value, q=$('#q').value.trim(), yf=$('#yf').value, yt=$('#yt').value;
+ if(!q && !yf && !yt){ $('#meta').textContent='Enter a query or a year range.'; return; }
+ $('#meta').innerHTML='<span class=spin></span>Loading index & searching…'; $('#results').innerHTML=''; $('#more').style.display='none';
+ let W; try{ W=await ensure(key); }catch(e){ $('#meta').textContent='Failed to load index: '+e.message; return; }
+ page=0; lastArgs={W,q,yf,yt};
+ let rows; try{ rows=await runQuery(W,q,yf,yt,0); }catch(e){ $('#meta').textContent='Query error: '+e.message; return; }
+ lastRows=rows;
+ const fl=(yf||yt)?` · ${yf||'…'}–${yt||'…'}`:'';
+ $('#meta').innerHTML=`<b>${rows.length===PAGE?PAGE+'+':rows.length}</b> result(s)${q?' for "'+esc(q)+'"':''} in <b>${esc(W.name)}</b>${fl}`;
+ $('#results').innerHTML=rows.map((r,i)=>cardHTML(r,i)).join('')||'<div class=panel>No results. Try a party name, judge, or broaden the query.</div>';
+ $('#more').style.display = rows.length===PAGE ? 'block':'none';
+ bindCards();
+}
+
+async function loadMore(){
+ if(!lastArgs) return; page++;
+ $('#more').innerHTML='<span class=spin></span>Loading…';
+ const {W,q,yf,yt}=lastArgs;
+ let rows; try{ rows=await runQuery(W,q,yf,yt,page*PAGE); }catch(e){ rows=[]; }
+ lastRows=lastRows.concat(rows);
+ $('#results').insertAdjacentHTML('beforeend',rows.map((r,i)=>cardHTML(r,lastRows.length-rows.length+i)).join(''));
+ $('#more').innerHTML='Load more results';
+ $('#more').style.display = rows.length===PAGE ? 'block':'none';
+ bindCards();
+}
+
+function cardHTML(r,i){
+ const date=r.decision_date||r.year||'';
+ const cite=r.citation||r.neutral||r.cnr||'';
+ return `<div class=card data-i="${i}">
+   <h3>${titleHTML(r.title)}</h3>
+   <div class=tags>
+     ${r.court?`<span class=tag>${esc(r.court)}</span>`:''}
+     ${date?`<span class="tag y">${esc(date)}</span>`:''}
+     ${r.disposal?`<span class="tag d">${esc(r.disposal)}</span>`:''}
+     ${cite?`<span class=tag>${esc(cite)}</span>`:''}
+     ${r.pdf_url?`<span class=tag>📄 PDF</span>`:''}
+   </div>
+   ${parseTitle(r.title).ref?`<div class=caseref>${esc(parseTitle(r.title).ref)}</div>`:''}
+ </div>`;
+}
+function bindCards(){ document.querySelectorAll('.card[data-i]').forEach(el=>{ el.onclick=()=>openD(lastRows[+el.dataset.i]); }); }
+
+// ---- detail drawer ----
+function openD(r){
+ if(!r) return;
+ const W=lastArgs.W;
+ const p=parseTitle(r.title);
+ $('#dtitle').innerHTML=titleHTML(r.title);
+ const ik="https://indiankanoon.org/search/?formInput="+encodeURIComponent((p.pet||'')+' '+(p.res||'')+' '+(r.neutral||r.citation||r.cnr||''));
+ const rows=[
+  ['Court', r.court||W.name],
+  ['Petitioner', p.pet],
+  ['Respondent', p.res],
+  ['Decision date', r.decision_date||r.year],
+  ['Bench / Judge', r.judge],
+  ['Case number', p.ref],
+  ['CNR', r.cnr],
+  ['Citation', r.citation],
+  ['Neutral citation', r.neutral],
+  ['Disposal', r.disposal],
+ ].filter(x=>x[1]);
+ const cite=r.neutral||r.citation||r.cnr||'';
+ let html=`<div class=grid>`+rows.map(x=>`<div class=k>${x[0]}</div><div class=v>${esc(x[1])}</div>`).join('')+`</div>
+  <div class=actions>
+   ${r.pdf_url?`<a class=btn href="${r.pdf_url}" target=_blank rel=noopener>📄 Open official PDF</a>`:''}
+   <a class="btn alt" href="${ik}" target=_blank rel=noopener>🔎 Read on Indian Kanoon</a>
+   ${cite?`<button class="btn alt" onclick="navigator.clipboard.writeText(${JSON.stringify(cite)});this.textContent='✓ Copied'">⧉ Copy citation</button>`:''}
+  </div>`;
+ if(r.pdf_url){
+   html+=`<div class=sechead>Full judgment</div>
+     <div class=pdfwrap><iframe src="${r.pdf_url}#view=FitH" title="judgment pdf" loading=lazy></iframe></div>
+     <div class=hint style="margin-top:6px">If the document doesn't display above, use “Open official PDF”. Large scanned judgments may take a moment to load.</div>`;
+ } else {
+   html+=`<div class=hint>No PDF is available in the open dataset for this record — use “Read on Indian Kanoon” for the text.</div>`;
+ }
+ html+=`<div class=sechead>Related cases (same party, this court)</div><div class=rel id=rel><span class=hint>searching…</span></div>`;
+ $('#dbody').innerHTML=html;
+ $('#scrim').classList.add('on'); $('#drawer').classList.add('on'); $('#drawer').setAttribute('aria-hidden','false');
+ $('#dbody').scrollTop=0;
+ loadRelated(W,p.pet,r);
+}
+async function loadRelated(W,party,self){
+ const term=(party||'').split(/[, ]+/).filter(w=>w.length>2).slice(0,2).join(' ');
+ if(!term){ $('#rel').innerHTML='<span class=hint>—</span>'; return; }
+ let rows=[]; try{ rows=await runQuery(W,term,'','',0); }catch(_){}
+ rows=rows.filter(x=>x.id!==self.id).slice(0,6);
+ $('#rel').innerHTML = rows.length? rows.map(r=>`<div class=card data-rel='${esc(JSON.stringify(r))}'>
+     <h3>${titleHTML(r.title)}</h3>
+     <div class=tags>${(r.decision_date||r.year)?`<span class="tag y">${esc(r.decision_date||r.year)}</span>`:''}${r.pdf_url?'<span class=tag>📄 PDF</span>':''}</div>
+   </div>`).join('') : '<span class=hint>No related cases found.</span>';
+ $('#rel').querySelectorAll('.card[data-rel]').forEach(el=>{ el.onclick=()=>openD(JSON.parse(el.dataset.rel)); });
+}
+function closeD(){ $('#scrim').classList.remove('on'); $('#drawer').classList.remove('on'); $('#drawer').setAttribute('aria-hidden','true'); }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeD(); });
+function clearAll(){ $('#q').value=''; $('#yf').value=''; $('#yt').value=''; $('#results').innerHTML=''; $('#meta').textContent=''; $('#more').style.display='none'; $('#q').focus(); }
+
+loadCourts().catch(e=>{ $('#boot').textContent='Failed to load court list: '+e.message; });
 </script>
 </body>
 </html>
