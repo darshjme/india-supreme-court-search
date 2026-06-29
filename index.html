@@ -32,6 +32,7 @@
  .tag{font-size:11.5px;background:#eaf3ee;color:#0b5a3c;border:1px solid #cfe6d8;border-radius:20px;padding:2px 9px;font-weight:600}
  .tag.y{background:#fff6e0;color:#8a6a13;border-color:#f0e2b8}
  .tag.d{background:#eef1ff;color:#3a44a0;border-color:#d6dbf5}
+ .tag.c{background:var(--ac);color:#fff;border-color:var(--ac)}
  .caseref{color:var(--mut);font-size:12.5px;margin-top:3px;font-family:ui-monospace,Consolas,monospace}
  #more{display:none;margin:6px auto 0;}
  /* detail drawer */
@@ -84,7 +85,7 @@
     <button class=ghost onclick="clearAll()">Clear</button>
     <span class=hint id=courtinfo></span>
    </div>
-   <div class=hint style="margin-top:8px">Tip: pick a court, type a party/judge/case-number, then click a result to read the full judgment. FTS5: <b>"exact phrase"</b>, AND/OR/NOT, prefix <b>arbitrat*</b>.</div>
+   <div class=hint style="margin-top:8px">Tip: leave it on <b>🇮🇳 All courts</b> to search every court at once (or pick one court for deeper results). Type a party/judge/case-number and click a result to read the full judgment. FTS5: <b>"exact phrase"</b>, AND/OR/NOT, prefix <b>arbitrat*</b>.</div>
   </div>
 
   <div class=meta id=meta></div>
@@ -144,7 +145,11 @@ async function loadCourts(){
  const r=await fetch(new URL(manifest,location.href).toString(),{cache:"no-cache"});
  COURTS=await r.json();
  const sel=$('#court'); sel.innerHTML=''; let tot=0;
- for(const c of COURTS){ tot+=c.rows||0;
+ for(const c of COURTS){ tot+=c.rows||0; }
+ // "All courts" option first
+ const oall=document.createElement('option'); oall.value='ALL';
+ oall.textContent=`🇮🇳 All courts — search everywhere  (${tot.toLocaleString()})`; sel.appendChild(oall);
+ for(const c of COURTS){
    const o=document.createElement('option'); o.value=c.key;
    o.textContent=`${c.name}  (${(c.rows||0).toLocaleString()})`; sel.appendChild(o); }
  $('#totrows').textContent=tot.toLocaleString();
@@ -167,7 +172,7 @@ async function ensure(key){
  const wkr=new URL("sqlite/sqlite.worker.js",location.href).toString();
  const wasm=new URL("sqlite/sql-wasm.wasm",location.href).toString();
  const w=await window.createDbWorker(cfg,wkr,wasm);
- workers[key]={db:w.db,kind:c.kind,name:c.name};
+ workers[key]={db:w.db,kind:c.kind,name:c.name,key:key};
  $('#courtinfo').textContent='';
  return workers[key];
 }
@@ -190,18 +195,31 @@ function buildQuery(W,q,yf,yt,limit,offset){
  return ()=>`SELECT ${sel} FROM j ${where} ORDER BY j.year DESC, j.id DESC LIMIT ${limit} OFFSET ${offset}`;
 }
 
-async function runQuery(W,q,yf,yt,offset){
- const b=buildQuery(W,q,yf,yt,PAGE,offset);
- try{ return await W.db.query(b(q?sqstr(q):'')); }
- catch(_){ return await W.db.query(b(sqstr('"'+(q||'').replace(/"/g,'')+'"'))); }
+async function runQuery(W,q,yf,yt,offset,limit){
+ const b=buildQuery(W,q,yf,yt,limit||PAGE,offset);
+ let rows;
+ try{ rows=await W.db.query(b(q?sqstr(q):'')); }
+ catch(_){ rows=await W.db.query(b(sqstr('"'+(q||'').replace(/"/g,'')+'"'))); }
+ // tag each row with its court so results can mix across courts
+ for(const r of rows){ r._key=W.key; r._court=(W.kind==='sc'?'Supreme Court of India':(r.court||W.name)); r._kind=W.kind; }
+ return rows;
+}
+
+// run async fn over items with a concurrency cap
+async function mapLimit(items,limit,fn){
+ const out=[]; let i=0;
+ async function worker(){ while(i<items.length){ const idx=i++; out[idx]=await fn(items[idx],idx); } }
+ await Promise.all(Array.from({length:Math.min(limit,items.length)},worker));
+ return out;
 }
 
 async function go(){
  const key=$('#court').value, q=$('#q').value.trim(), yf=$('#yf').value, yt=$('#yt').value;
+ if(key==='ALL') return goAll(q,yf,yt);   // All-courts: search, or browse recent if empty
  if(!q && !yf && !yt){ $('#meta').textContent='Enter a query or a year range.'; return; }
  $('#meta').innerHTML='<span class=spin></span>Loading index & searching…'; $('#results').innerHTML=''; $('#more').style.display='none';
  let W; try{ W=await ensure(key); }catch(e){ $('#meta').textContent='Failed to load index: '+e.message; return; }
- page=0; lastArgs={W,q,yf,yt};
+ page=0; lastArgs={W,q,yf,yt,mode:'one'};
  let rows; try{ rows=await runQuery(W,q,yf,yt,0); }catch(e){ $('#meta').textContent='Query error: '+e.message; return; }
  lastRows=rows;
  const fl=(yf||yt)?` · ${yf||'…'}–${yt||'…'}`:'';
@@ -211,8 +229,33 @@ async function go(){
  bindCards();
 }
 
+// federated search across EVERY court, merged
+async function goAll(q,yf,yt){
+ $('#results').innerHTML=''; $('#more').style.display='none';
+ const keys=COURTS.map(c=>c.key);
+ const per=q?10:6;   // results pulled per court
+ let done=0;
+ const tick=()=>{ $('#meta').innerHTML=`<span class=spin></span>Searching all ${keys.length} courts… (${done}/${keys.length})`; };
+ tick();
+ const chunks=await mapLimit(keys,6,async key=>{
+   let W; try{ W=await ensure(key); }catch(_){ done++; tick(); return []; }
+   let rows=[]; try{ rows=await runQuery(W,q,yf,yt,0,per); }catch(_){ rows=[]; }
+   done++; tick();
+   return rows;
+ });
+ let rows=[].concat(...chunks);
+ // newest first across courts (common, comparable key)
+ rows.sort((a,b)=>String(b.decision_date||b.year||'').localeCompare(String(a.decision_date||a.year||'')));
+ lastRows=rows; lastArgs={mode:'all',q,yf,yt};
+ const fl=(yf||yt)?` · ${yf||'…'}–${yt||'…'}`:'';
+ const note=`<div class=hint style="margin-top:3px">Showing up to ${per} matches per court (newest first). For deeper results in one court, pick it from the dropdown.</div>`;
+ $('#meta').innerHTML=`<b>${rows.length}</b> result(s)${q?' for "'+esc(q)+'"':' (recent)'} across <b>all ${keys.length} courts</b>${fl}`+note;
+ $('#results').innerHTML=rows.map((r,i)=>cardHTML(r,i,true)).join('')||'<div class=panel>No results across any court. Try a different term.</div>';
+ bindCards();
+}
+
 async function loadMore(){
- if(!lastArgs) return; page++;
+ if(!lastArgs || lastArgs.mode!=='one') return; page++;
  $('#more').innerHTML='<span class=spin></span>Loading…';
  const {W,q,yf,yt}=lastArgs;
  let rows; try{ rows=await runQuery(W,q,yf,yt,page*PAGE); }catch(e){ rows=[]; }
@@ -223,13 +266,14 @@ async function loadMore(){
  bindCards();
 }
 
-function cardHTML(r,i){
+function cardHTML(r,i,showCourt){
  const date=r.decision_date||r.year||'';
  const cite=r.citation||r.neutral||r.cnr||'';
+ const courtName = showCourt ? (r._court||r.court) : r.court;
  return `<div class=card data-i="${i}">
    <h3>${titleHTML(r.title)}</h3>
    <div class=tags>
-     ${r.court?`<span class=tag>${esc(r.court)}</span>`:''}
+     ${courtName?`<span class="tag${showCourt?' c':''}">${esc(courtName)}</span>`:''}
      ${date?`<span class="tag y">${esc(date)}</span>`:''}
      ${r.disposal?`<span class="tag d">${esc(r.disposal)}</span>`:''}
      ${cite?`<span class=tag>${esc(cite)}</span>`:''}
@@ -243,11 +287,11 @@ function bindCards(){ document.querySelectorAll('.card[data-i]').forEach(el=>{ e
 // ---- detail drawer ----
 function openD(r){
  if(!r) return;
- const W=lastArgs.W;
+ const W=workers[r._key]||lastArgs.W||{name:r._court,kind:r._kind};
  const p=parseTitle(r.title);
  $('#dtitle').innerHTML=titleHTML(r.title);
  const rows=[
-  ['Court', r.court||W.name],
+  ['Court', r._court||r.court||W.name],
   ['Petitioner', p.pet],
   ['Respondent', p.res],
   ['Decision date', r.decision_date||r.year],
