@@ -1,0 +1,262 @@
+[
+ {
+  "key": "SC",
+  "name": "Supreme Court of India",
+  "kind": "sc",
+  "rows": 43495,
+  "urlPrefix": "data/index.db.",
+  "lengthBytes": 23306240,
+  "serverChunkSize": 10485760,
+  "suffixLength": 3
+ },
+ {
+  "key": "9_13",
+  "name": "Allahabad High Court",
+  "kind": "hc",
+  "rows": 1692107,
+  "urlPrefix": "https://darshjme.github.io/india-courts-data-3/9_13.db.",
+  "lengthBytes": 757170176,
+  "serverChunkSize": 10485760,
+  "suffixLength": 3
+ },
+ {
+  "key": "27_1",
+  "name": "Bombay High Court",
+  "kind": "hc",
+  "rows": 1772293,
+  "urlPrefix": "https://darshjme.github.io/india-courts-data-1/27_1.db.",
+  "lengthBytes": 905830400,
+  "serverChunkSize": 10485760,
+  "suffixLength": 3
+ },
+ {
+  "key": "19_16",
+  "name": "Calcutta High Court",
+  "kind": "hc",
+  "rows": 401869,
+  "urlPrefix": "https://darshjme.github.io/india-courts-data-8/19_16.db.",
+  "lengthBytes": 190992384,
+  "serverChunkSize": 10485760,
+  "suffixLength": 3
+ },
+ {
+  "key": "18_6",
+  "name": "Gauhati High Court",
+  "kind": "hc",
+  "rows": 319627,
+  "urlPrefix": "https://darshjme.github.io/india-courts-data-2/18_6.db.",
+  "lengthBytes": 138133504,
+  "serverChunkSize": 10485760,
+  "suffixLength": 3
+ },
+ {
+  "key": "22_18",
+  "name": "High Court Of Chhattisgarh",
+  "kind": "hc",
+  "rows": 561180,
+  "urlPrefix": "https://darshjme.github.io/india-courts-data-5/22_18.db.",
+  "lengthBytes": 259506176,
+  "serverChunkSize": 10485760,
+  "suffixLength": 3
+ },
+ {
+  "key": "8_9",
+  "name": "High Court Of Rajasthan",
+  "kind": "hc",
+  "rows": 1093006,
+  "urlPrefix": "https://darshjme.github.io/india-courts-data-7/8_9.db.",
+  "lengthBytes": 444383232,
+  "serverChunkSize": 10485760,
+  "suffixLength": 3
+ },
+ {
+  "key": "36_29",
+  "name": "High Court for State of Telangana",
+  "kind": "hc",
+  "rows": 1042793,
+  "urlPrefix": "https://darshjme.github.io/india-courts-data-6/36_29.db.",
+  "lengthBytes": 474210304,
+  "serverChunkSize": 10485760,
+  "suffixLength": 3
+ },
+ {
+  "key": "28_2",
+  "name": "High Court of Andhra Pradesh",
+  "kind": "hc",
+  "rows": 301270,
+  "urlPrefix": "https://darshjme.github.io/india-courts-data-7/28_2.db.",
+  "lengthBytes": 131969024,
+  "serverChunkSize": 10485760,
+  "suffixLength": 3
+ },
+ {
+  "key": "7_26",
+  "name": "High Court of Delhi",
+  "kind": "hc",
+  "rows": 378425,
+  "urlPrefix": "https://darshjme.github.io/india-courts-data-8/7_26.db.",
+  "lengthBytes": 173117440,
+  "serverChunkSize": 10485760,
+  "suffixLength": 3
+ },
+ {
+  "key": "24_17",
+  "name": "High Court of Gujarat",
+  "kind": "hc",
+  "rows": 420678,
+  "urlPrefix": "https://darshjme.github.io/india-courts-data-4/24_17.db.",
+  "lengthBytes": 209981440,
+  "serverChunkSize": 10485760,
+  "suffixLength": 3
+ },
+ {
+  "key": "2_5",
+  "name": "High Court of Himachal Pradesh",
+  "kind": "hc",
+  "rows": 281700,
+  "urlPrefix": "https://darshjme.github.io/india-courts-data-9/2_5.db.",
+  "lengthBytes": 130953216,
+  "serverChunkSize": 10485760,
+  "suffixLength": 3
+ },
+ {
+  "key": "1_12",
+  "name": "High Court of Jammu and Kashmir",
+  "kind": "hc",
+  "rows": 111912,
+  "urlPrefix": "https://darshjme.github.io/india-courts-data-1/1_12.db.",
+  "lengthBytes": 58101760,
+  "serverChunkSize": 10485760,
+  "suffixLength": 3
+ },
+ {
+  "key": "20_7",
+  "name": "High Court of Jharkhand",
+  "kind": "hc",
+  "rows": 455348,
+  "urlPrefix": "https://darshjme.github.io/india-courts-data-3/20_7.db.",
+  "lengthBytes": 210554880,
+  "serverChunkSize": 10485760,
+  "suffixLength": 3
+ },
+ {
+  "key": "29_3",
+  "name": "High Court of Karnataka",
+  "kind": "hc",
+  "rows": 946139,
+  "urlPrefix": "https://darshjme.github.io/india-courts-data-7/29_3.db.",
+  "lengthBytes": 405037056,
+  "serverChunkSize": 10485760,
+  "suffixLength": 3
+ },
+ {
+  "key": "32_4",
+  "name": "High Court of Kerala",
+  "kind": "hc",
+  "rows": 1036139,
+  "urlPrefix": "https://darshjme.github.io/india-courts-data-6/32_4.db.",
+  "lengthBytes": 477417472,
+  "serverChunkSize": 10485760,
+  "suffixLength": 3
+ },
+ {
+  "key": "23_23",
+  "name": "High Court of Madhya Pradesh",
+  "kind": "hc",
+  "rows": 650509,
+  "urlPrefix": "https://darshjme.github.io/india-courts-data-8/23_23.db.",
+  "lengthBytes": 254332928,
+  "serverChunkSize": 10485760,
+  "suffixLength": 3
+ },
+ {
+  "key": "14_25",
+  "name": "High Court of Manipur",
+  "kind": "hc",
+  "rows": 18597,
+  "urlPrefix": "https://darshjme.github.io/india-courts-data-2/14_25.db.",
+  "lengthBytes": 8937472,
+  "serverChunkSize": 10485760,
+  "suffixLength": 3
+ },
+ {
+  "key": "17_21",
+  "name": "High Court of Meghalaya",
+  "kind": "hc",
+  "rows": 12448,
+  "urlPrefix": "https://darshjme.github.io/india-courts-data-2/17_21.db.",
+  "lengthBytes": 6144000,
+  "serverChunkSize": 10485760,
+  "suffixLength": 3
+ },
+ {
+  "key": "3_22",
+  "name": "High Court of Punjab and Haryana",
+  "kind": "hc",
+  "rows": 1844023,
+  "urlPrefix": "https://darshjme.github.io/india-courts-data-2/3_22.db.",
+  "lengthBytes": 815546368,
+  "serverChunkSize": 10485760,
+  "suffixLength": 3
+ },
+ {
+  "key": "11_24",
+  "name": "High Court of Sikkim",
+  "kind": "hc",
+  "rows": 2420,
+  "urlPrefix": "https://darshjme.github.io/india-courts-data-1/11_24.db.",
+  "lengthBytes": 1191936,
+  "serverChunkSize": 10485760,
+  "suffixLength": 3
+ },
+ {
+  "key": "16_20",
+  "name": "High Court of Tripura",
+  "kind": "hc",
+  "rows": 33865,
+  "urlPrefix": "https://darshjme.github.io/india-courts-data-1/16_20.db.",
+  "lengthBytes": 15962112,
+  "serverChunkSize": 10485760,
+  "suffixLength": 3
+ },
+ {
+  "key": "5_15",
+  "name": "High Court of Uttarakhand",
+  "kind": "hc",
+  "rows": 233734,
+  "urlPrefix": "https://darshjme.github.io/india-courts-data-9/5_15.db.",
+  "lengthBytes": 105263104,
+  "serverChunkSize": 10485760,
+  "suffixLength": 3
+ },
+ {
+  "key": "33_10",
+  "name": "Madras High Court",
+  "kind": "hc",
+  "rows": 1673607,
+  "urlPrefix": "https://darshjme.github.io/india-courts-data-4/33_10.db.",
+  "lengthBytes": 742973440,
+  "serverChunkSize": 10485760,
+  "suffixLength": 3
+ },
+ {
+  "key": "21_11",
+  "name": "Orissa High Court",
+  "kind": "hc",
+  "rows": 785832,
+  "urlPrefix": "https://darshjme.github.io/india-courts-data-8/21_11.db.",
+  "lengthBytes": 330964992,
+  "serverChunkSize": 10485760,
+  "suffixLength": 3
+ },
+ {
+  "key": "10_8",
+  "name": "Patna High Court",
+  "kind": "hc",
+  "rows": 1695874,
+  "urlPrefix": "https://darshjme.github.io/india-courts-data-5/10_8.db.",
+  "lengthBytes": 720101376,
+  "serverChunkSize": 10485760,
+  "suffixLength": 3
+ }
+]
