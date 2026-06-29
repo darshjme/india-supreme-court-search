@@ -83,7 +83,21 @@
     <input id=yt type=number placeholder="Year to" style="width:120px">
     <button class=ghost onclick="go()">Apply years</button>
     <button class=ghost onclick="clearAll()">Clear</button>
+    <button class=ghost id=fbtn onclick="toggleFilters()" style="display:none">⚙ Filter courts</button>
     <span class=hint id=courtinfo></span>
+   </div>
+   <div id=allfilters style="display:none;margin-top:10px;border-top:1px solid var(--line);padding-top:10px">
+    <div class=sub2 style="margin:0 0 8px">
+     <b style="font-size:13px">Include courts:</b>
+     <button class=ghost onclick="selectCourts(true)">Select all</button>
+     <button class=ghost onclick="selectCourts(false)">Clear</button>
+     <span class=hint id=fcount></span>
+     <span style="flex:1"></span>
+     <label class=hint>Matches/court:
+      <select id=percourt><option>10</option><option>20</option><option>40</option></select>
+     </label>
+    </div>
+    <div id=courtchecks style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:4px 14px;max-height:190px;overflow:auto;font-size:13px"></div>
    </div>
    <div class=hint style="margin-top:8px">Tip: leave it on <b>🇮🇳 All courts</b> to search every court at once (or pick one court for deeper results). Type a party/judge/case-number and click a result to read the full judgment. FTS5: <b>"exact phrase"</b>, AND/OR/NOT, prefix <b>arbitrat*</b>.</div>
   </div>
@@ -153,10 +167,20 @@ async function loadCourts(){
    const o=document.createElement('option'); o.value=c.key;
    o.textContent=`${c.name}  (${(c.rows||0).toLocaleString()})`; sel.appendChild(o); }
  $('#totrows').textContent=tot.toLocaleString();
- sel.onchange=()=>{ $('#results').innerHTML=''; $('#meta').textContent=''; $('#more').style.display='none'; $('#courtinfo').textContent=''; };
+ // court checkboxes for All-courts filtering
+ $('#courtchecks').innerHTML=COURTS.map(c=>
+   `<label style="display:flex;gap:6px;align-items:center"><input type=checkbox class=cck value="${c.key}" checked onchange="updateFcount()"><span>${esc(c.name)}</span></label>`).join('');
+ updateFcount();
+ const syncMode=()=>{ const all=sel.value==='ALL'; $('#fbtn').style.display=all?'':'none'; if(!all) $('#allfilters').style.display='none'; };
+ sel.onchange=()=>{ $('#results').innerHTML=''; $('#meta').textContent=''; $('#more').style.display='none'; $('#courtinfo').textContent=''; syncMode(); };
+ syncMode();
  $('#q').addEventListener('keydown',e=>{ if(e.key==='Enter') go(); });
  $('#boot').style.display='none'; $('#app').style.display='block'; $('#q').focus();
 }
+function toggleFilters(){ const e=$('#allfilters'); e.style.display=e.style.display==='none'?'block':'none'; }
+function selectCourts(v){ document.querySelectorAll('.cck').forEach(c=>c.checked=v); updateFcount(); }
+function selectedCourts(){ return [...document.querySelectorAll('.cck:checked')].map(c=>c.value); }
+function updateFcount(){ const n=selectedCourts().length, t=document.querySelectorAll('.cck').length; const el=$('#fcount'); if(el) el.textContent=`${n} of ${t} courts`; }
 
 async function ensure(key){
  if(workers[key]) return workers[key];
@@ -232,8 +256,9 @@ async function go(){
 // federated search across EVERY court, merged
 async function goAll(q,yf,yt){
  $('#results').innerHTML=''; $('#more').style.display='none';
- const keys=COURTS.map(c=>c.key);
- const per=q?10:6;   // results pulled per court
+ let keys=selectedCourts();
+ if(!keys.length){ $('#meta').textContent='Select at least one court (⚙ Filter courts).'; return; }
+ const per=parseInt(($('#percourt')&&$('#percourt').value)||'10',10);
  let done=0;
  const tick=()=>{ $('#meta').innerHTML=`<span class=spin></span>Searching all ${keys.length} courts… (${done}/${keys.length})`; };
  tick();
@@ -248,8 +273,9 @@ async function goAll(q,yf,yt){
  rows.sort((a,b)=>String(b.decision_date||b.year||'').localeCompare(String(a.decision_date||a.year||'')));
  lastRows=rows; lastArgs={mode:'all',q,yf,yt};
  const fl=(yf||yt)?` · ${yf||'…'}–${yt||'…'}`:'';
+ const scope = keys.length===COURTS.length ? `all ${keys.length} courts` : `${keys.length} selected court(s)`;
  const note=`<div class=hint style="margin-top:3px">Showing up to ${per} matches per court (newest first). For deeper results in one court, pick it from the dropdown.</div>`;
- $('#meta').innerHTML=`<b>${rows.length}</b> result(s)${q?' for "'+esc(q)+'"':' (recent)'} across <b>all ${keys.length} courts</b>${fl}`+note;
+ $('#meta').innerHTML=`<b>${rows.length}</b> result(s)${q?' for "'+esc(q)+'"':' (recent)'} across <b>${scope}</b>${fl}`+note;
  $('#results').innerHTML=rows.map((r,i)=>cardHTML(r,i,true)).join('')||'<div class=panel>No results across any court. Try a different term.</div>';
  bindCards();
 }
