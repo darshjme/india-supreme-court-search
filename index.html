@@ -59,8 +59,11 @@
 <script src="sqlite/index.js"></script>
 <script>
 const $=s=>document.querySelector(s); let db, last=[];
-const CONFIG=[{ from:"inline", config:{ serverMode:"full",
-  url:new URL("data/index.db",location.href).toString(), requestChunkSize:4096 }}];
+// chunked mode: length supplied explicitly (GitHub Pages gzips HEAD, breaking full-mode length detection)
+const CONFIG=[{ from:"inline", config:{
+  serverMode:"chunked", requestChunkSize:4096,
+  urlPrefix:new URL("data/index.db.",location.href).toString(),
+  serverChunkSize:10485760, databaseLengthBytes:23306240, suffixLength:3 }}];
 async function boot(){
  try{
   const wkr=new URL("sqlite/sqlite.worker.js",location.href).toString();
